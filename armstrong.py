@@ -1,3 +1,5 @@
+#!/usr/bin/python3
+
 lower = 100
 upper = 1000
 
