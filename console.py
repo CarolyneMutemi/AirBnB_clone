@@ -105,6 +105,19 @@ class HBNBCommand(cmd.Cmd):
         else:
             print("** class doesn't exist **")
 
+    @staticmethod
+    def count(class_name):
+        """
+        Counts the number of instances of a class.
+        """
+        all_objs = storage.all()
+        count = 0
+        for v in all_objs.values():
+            if v.__class__.__name__ == class_name:
+                count += 1
+
+        print(count)
+
     def do_update(self, class_plus_att):
         """
          Updates an instance based on the class name and id
@@ -152,6 +165,30 @@ class HBNBCommand(cmd.Cmd):
 
     def emptyline(self):
         pass
+
+    def default(self, line):
+        class_name = line.split('.')[0]
+        obj_id = line.split('.')[1].split('(')[1].strip(')')
+        if class_name in ["BaseModel", "User", "State", "City", "Amenity","Place", "Review"]:
+            command_all = f"{class_name}.all()"
+            command_count = f"{class_name}.count()"
+            command_show = f"{class_name}.show({obj_id})"
+            command_destroy = f"{class_name}.destroy({obj_id})"
+            if line == command_all:
+                line = f'all {class_name}'
+                cmd.Cmd.onecmd(self, line)
+            elif line == command_count:
+                HBNBCommand.count(class_name)
+            elif line == command_show:
+                line = f'show {class_name} {obj_id}'
+                cmd.Cmd.onecmd(self, line)
+            elif line == command_destroy:
+                line = f'destroy {class_name} {obj_id}'
+                cmd.Cmd.onecmd(self, line)
+            else:
+                cmd.Cmd.default(self, line)
+        else:
+            cmd.Cmd.default(self, line)
 
 
 if __name__ == "__main__":
