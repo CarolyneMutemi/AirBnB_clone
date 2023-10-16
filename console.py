@@ -168,9 +168,29 @@ class HBNBCommand(cmd.Cmd):
 
     def default(self, line):
         class_name = line.split('.')[0]
-        obj_id = line.split('.')[1].split('(')[1].strip(')')
+
         if class_name in ["BaseModel", "User", "State", "City",
                           "Amenity", "Place", "Review"]:
+            try:
+                obj_att = line.split('(')[1].strip(')').split(',')
+                obj_id = ""
+                obj_att_name = ""
+                obj_att_value = ""
+                command_update = f"{class_name}.update()"
+                if len(obj_att) == 1:
+                    obj_id = obj_att[0]
+                    command_update = f"{class_name}.update({obj_id})"
+                elif len(obj_att) == 2:
+                    obj_id = obj_att[0]
+                    obj_att_name = obj_att[1]
+                    command_update = f"{class_name}.update({obj_id},{obj_att_name})"
+                elif len(obj_att) > 2:
+                    obj_id = obj_att[0]
+                    obj_att_name = obj_att[1]
+                    obj_att_value = obj_att[2]
+                    command_update = f"{class_name}.update({obj_id},{obj_att_name},{obj_att_value})"
+            except IndexError:
+                return cmd.Cmd.default(self, line)
             command_all = f"{class_name}.all()"
             command_count = f"{class_name}.count()"
             command_show = f"{class_name}.show({obj_id})"
@@ -186,10 +206,13 @@ class HBNBCommand(cmd.Cmd):
             elif line == command_destroy:
                 line = f'destroy {class_name} {obj_id}'
                 cmd.Cmd.onecmd(self, line)
+            elif line == command_update:
+                line = f'update {class_name} {obj_id} {obj_att_name} {obj_att_value}'
+                cmd.Cmd.onecmd(self, line)
             else:
-                cmd.Cmd.default(self, line)
+                return cmd.Cmd.default(self, line)
         else:
-            cmd.Cmd.default(self, line)
+            return cmd.Cmd.default(self, line)
 
 
 if __name__ == "__main__":
