@@ -169,7 +169,8 @@ class HBNBCommand(cmd.Cmd):
     def default(self, line):
         class_name = line.split('.')[0]
         obj_id = line.split('.')[1].split('(')[1].strip(')')
-        if class_name in ["BaseModel", "User", "State", "City", "Amenity","Place", "Review"]:
+        if class_name in ["BaseModel", "User", "State", "City",
+                          "Amenity", "Place", "Review"]:
             command_all = f"{class_name}.all()"
             command_count = f"{class_name}.count()"
             command_show = f"{class_name}.show({obj_id})"
