@@ -4,6 +4,9 @@
 Contains the CMD program.
 """
 import cmd
+import re
+import ast
+import shlex
 from models.base_model import BaseModel
 from models.user import User
 from models.state import State
@@ -12,7 +15,6 @@ from models.amenity import Amenity
 from models.place import Place
 from models.review import Review
 from models import storage
-import shlex
 
 
 class HBNBCommand(cmd.Cmd):
@@ -118,6 +120,16 @@ class HBNBCommand(cmd.Cmd):
 
         print(count)
 
+    @staticmethod
+    def find_dict(text):
+        """
+        Finds a dictionary within a text and returns the dictionary.
+        """
+        pattern = r"(\{.+\})"
+        check_match = re.findall(pattern, text)
+        if len(check_match):
+            return ast.literal_eval(check_match[0])
+
     def do_update(self, class_plus_att):
         """
          Updates an instance based on the class name and id
@@ -168,6 +180,7 @@ class HBNBCommand(cmd.Cmd):
 
     def default(self, line):
         class_name = line.split('.')[0]
+        dict_repr = HBNBCommand.find_dict(line)
 
         if class_name in ["BaseModel", "User", "State", "City",
                           "Amenity", "Place", "Review"]:
@@ -176,6 +189,7 @@ class HBNBCommand(cmd.Cmd):
                 obj_id = ""
                 obj_att_name = ""
                 obj_att_value = ""
+                check_dict = 0
                 command_update = f"{class_name}.update()"
                 if len(obj_att) == 1:
                     obj_id = obj_att[0]
@@ -189,6 +203,8 @@ class HBNBCommand(cmd.Cmd):
                     obj_att_name = obj_att[1]
                     obj_att_value = obj_att[2]
                     command_update = f"{class_name}.update({obj_id},{obj_att_name},{obj_att_value})"
+                if len(obj_att) and dict_repr:
+                    check_dict = 1
             except IndexError:
                 return cmd.Cmd.default(self, line)
             command_all = f"{class_name}.all()"
@@ -206,9 +222,14 @@ class HBNBCommand(cmd.Cmd):
             elif line == command_destroy:
                 line = f'destroy {class_name} {obj_id}'
                 cmd.Cmd.onecmd(self, line)
-            elif line == command_update:
-                line = f'update {class_name} {obj_id} {obj_att_name} {obj_att_value}'
-                cmd.Cmd.onecmd(self, line)
+            elif line == command_update or check_dict:
+                if check_dict:
+                    for k, v in dict_repr.items():
+                        line = f'update {class_name} {obj_id} {k} {v}'
+                        cmd.Cmd.onecmd(self, line)
+                else:
+                    line = f'update {class_name} {obj_id} {obj_att_name} {obj_att_value}'
+                    cmd.Cmd.onecmd(self, line)
             else:
                 return cmd.Cmd.default(self, line)
         else:
