@@ -8,6 +8,7 @@ import json
 import os
 from models.base_model import BaseModel
 from models import storage
+from models.engine.file_storage import FileStorage
 
 
 class TestFileStorage(unittest.TestCase):
@@ -16,6 +17,13 @@ class TestFileStorage(unittest.TestCase):
     """
     def setUp(self):
         self.new_model = BaseModel()
+
+    def test_class_attributes(self):
+        """
+        Tests the class attributes.
+        """
+        self.assertEqual(storage.all(), FileStorage._FileStorage__objects)
+        self.assertEqual(FileStorage._FileStorage__file_path, "file.json")
 
     def test_all(self):
         """
